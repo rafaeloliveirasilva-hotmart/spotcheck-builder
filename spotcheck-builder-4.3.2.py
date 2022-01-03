@@ -1,4 +1,4 @@
-__author__ = 'Rafael de Oliveira'
+__author__ = 'rafael.oliveirasilva@hotmart.com | QA & WFM'
 
 import csv
 import datetime
@@ -21,6 +21,9 @@ import pdb
 ASTROBOX_TOKEN = "Bearer H4sIAAAAAAAAAGVU25KqOhT8Ik8Byjg%2BikGEIYlCLpCXUwIjd3VEueTrd7Cm9sM5D6miSLO61%2BpefE9ekThpiUsvpNLVUel27jUw05374db3iO28zT%2Ffk6enBpsiwywSTmfwFHNRCD68EmO8Zy27p%2B1envloxNS6JcvgGUee5reoT0i3hNI2EchqVGom4nTwSVAjWT8xiEcUzu9sHTmxjp2TiSpa%2BjtPxsZmEKH7wSdvEnxfu%2BVQZkvvnjm0jMKhPDsbzY%2BYFJGr9LgSyXjCBE6QPMNfbblwaE7%2B6rNzajRd1tprRE4vDOALSvhCZLtGgL4gSUe%2FsldotxqhdNeqnzbmrPPbTXeORHOOvCJ9f7%2FfztwJ30%2FZzqwSQ%2FuL%2Fd8seNFnjl6k19MaEtWrTCUCcInJdoDgyZK20QQ%2F5XQZFJnDJJa2oXSoeZ1UP7XCbNdY22uKv8e6RSPNC7HOSAA6TVReBR24gqE2xZI1aqYF5vAZk1qPJ70SpGgESXVYbSUy%2FsMPUk1pUP3TJQSqBoAjBttBHYkBXUPQjahyTUzqldKhYaCOtHqqIRhUtmQRG4izMU5UB1ljDRQwA7aFDPhdP1dBC1s4xDIffeJVyu8ncmxTaSowYZXPUYMd1iBJJ8W7FG8ulQ%2FiGphQDc46ZLdWZ0TAXf8%2Br2f%2FRVQMbnVTeDjMfiFSayorRRYFKnNzNpomnd6ZIdTeh6E27qN5Xsx9ZyqLrD69Bs1cS%2BWri7nXK6%2FqZPm%2BNwQ3a8GDPn0vgTUlRqBnzmaa8aG9oXTvHSNNhAFlKGQM%2FdZ5pgevEL84prFdSE2LzjXq4shsZVwTXIjd8IBtdgELrBlH7dFitjjSWr9QrTmQhp3cRuvc9q6dVe7dNtZRhWoot5NP0iE27CcC%2BxLu9BK2nvJ7r%2B5qGcs5e%2FEAJ8XXou7M2Svbb%2B5iXuDKnkQLddWTwqeaaN81mnjSVhiI1udQYgcO2HGXkFitKNWyH5BwVmcwWl9nn%2FuNFWwG5z6N%2FWf%2FRVBXXID54z6i%2FB59%2FHudxigPLi7jgbxM9yLH7f5RkOp2WjRn%2BWlusUB4deRMlP651hB%2BfeSvj2Zx8dzA8vuodw59D%2FBFP0rQphoqjqC1sjLvi%2B%2FTkjubw7FhHY5HYO7aKr2Vup5U2%2B9dPjZX7ITD5dg7XfuKa%2FJFZAvMQgzXPH7qjx6KknLSeLfudA7489YZnpwWLsxOsXjA9MZr7xnCIFonC3n5%2BrF83Ty06wKclsHdPZrl54L8PMYXOMC8WayD0Uoy8qg9ugWgSsNpvf1GYRSON%2BxMeba0r6Uk0tblbTgZW6L%2BKQ10LweRcOgs8up4SR75HxJjxHRoBQAA"
 
 DATE_INTERVAL_DAYS = 7
+
+login = 'rafael.oliveirasilva@hotmart.com'
+pwd = 'raf060990'
 
 astrobox_url = 'https://api-astrobox.hotmart.com/v1/'
 opinion_box_url = 'https://api-cx.opinionbox.com/'
@@ -56,9 +59,9 @@ astrobox_query_params = {
     'team_id': [product_team_id, refund_team_id, tool_team_id, int_buyers_team_id, payment_team_id, access_team_id, financial_team_id, int_users_team_id, int_french_english_id, int_access_team_id, hotmart_account_team_id, purchase_team_id, activation_team_id, int_journey_team, int_operations_team, int_product_team]
 }
 
-base_dir = os.getenv("E:\ASSURANCE - Spotcheck")
+base_dir = os.getenv("E:\QLT Assurance - Spotcheck")
 if os.name == 'nt':
-    base_dir = 'E:\ASSURANCE - Spotcheck'
+    base_dir = 'E:\QLT Assurance - Spotcheck'
 
 
 #######################
@@ -86,9 +89,12 @@ def get_astrobox_token():
 
     login_url = 'https://api-sec-vlc.hotmart.com/security/oauth/token'
 
-    username = input('Your email: ')
-    user_pass = getpass.getpass('Your password: ')
-    
+    # username = input('Your email: ')
+    # user_pass = getpass.getpass('Your password: ')
+
+    username = login
+    user_pass = pwd
+
     login_headers = {
         'Authorization': 'Basic MTJmYzVlZGUtNzRmYS00MWVjLTg4NmYtYzM4YzA4YjcxMGZmOjE4MjFhOGRlLTMxNDgtNGU3ZC05OGZmLWZkY2NiOGY0MzkzNw=='
     }
@@ -350,7 +356,7 @@ def get_ticket_audit_file_path(base_path=base_dir):
 
     current_quarter = ((date.today().month - 1) // 3) + 1
 
-    folder_name = 'ASSURANCE - SPOTCHECK - Q' + str(current_quarter) + ' ' + str(date.today().year) + ' - CSV'
+    folder_name = 'QLT ASSURANCE - SPOTCHECK - Q' + str(current_quarter) + ' ' + str(date.today().year) + ' - CSVS'
 
     # Definir diretório para salvar o CSV
     absolut_path = base_path + os.sep + folder_name + os.sep
@@ -359,7 +365,7 @@ def get_ticket_audit_file_path(base_path=base_dir):
 
     print('file will be saved on path: ' + absolut_path)
 
-    file_name = 'ASSURANCE - ' + dt_string + '-AUDIT.csv'
+    file_name = 'QLT Assurance - Spotcheck - ' + dt_string + '.csv'
 
     print('file name: ' + file_name)
 
@@ -411,24 +417,86 @@ def create_ticket_audit_csv(astrobox_data, opinionbox_data, file_path):
     for ticket_id, astrobox_ticket in astrobox_data.items():
         
         opinionbox_ticket = opinionbox_data.get(str(ticket_id), {})
+
+        # É feita a captura do campo do first resolution que vem em segundos do Astrobox
+        # Em sequência o mesmo é formatado para o padrão hora/minuto/segundo
+
+        firstResolution = astrobox_ticket['firstResolution']
+        firstResolution_formatted = str(datetime.timedelta(seconds=firstResolution))
+
+        # É feita a captura do campo da data de criação do ticket no Zendesk, através do Astrobox - que vem no formato '2021-12-2021T17:15:46Z'.
+        # Em seguida a data é formatada para o padrão '17/12/2021 17:15:46'
+
+        old_createdAt = datetime.datetime.strptime(astrobox_ticket['createdAt'], '%Y-%m-%dT%H:%M:%SZ')
+        new_createdAt = old_createdAt.strftime("%d/%m/%Y %H:%M:%S") 
+        
+
+        # É feita a captura dos campo da data de envio e data de resposta da pesquisa de satisfação através da OPB - que vem no formato '2021-12-2021T17:15:46.000Z'.
+        # Em seguida a data é formatada para o padrão '17/12/2021 17:15:46'
+        # Depois é testado se o campo de data de envio vier preenchido, a formatação ocorre, senão o código segue para o próximo teste
+
+        surveySentAt = opinionbox_ticket.get('data_envio')
+        surveyAnsweredAt = opinionbox_ticket.get('datetime')
+
+        if surveySentAt is not None:
+            old_surveySentAt = datetime.datetime.strptime(opinionbox_ticket.get('data_envio'), "%Y-%m-%dT%H:%M:%S.%fZ")
+            surveySentAt = old_surveySentAt.strftime("%d/%m/%Y %H:%M:%S") 
+        else:
+            pass
+
+        if surveyAnsweredAt is not None:
+            old_surveyAnsweredAt = datetime.datetime.strptime(opinionbox_ticket.get('datetime'), "%Y-%m-%dT%H:%M:%S.%fZ")
+            surveyAnsweredAt = old_surveyAnsweredAt.strftime("%d/%m/%Y %H:%M:%S") 
+        else:
+            pass
+
+
+        # Mapeamento que verifica se a pesquisa da OPB vier com notas de 1 à 5 os números serão convertidos para inteiros, se vier como strings de sentimento passarão pelo map que irá atribuir uma nota baseada no sentimento
+
         evaluation_grade = opinionbox_ticket.get('evaluation_grade')
+
         try:
             evaluation_grade = int(evaluation_grade)
         except (ValueError, TypeError):
             evaluation_grade = evaluation_map.get(evaluation_grade, evaluation_grade)
+
+        # Variáveis que geram os links para realização da análise do Spotcheck e visualização dos tickets no zendesk respectivamente
+
+        open_spotcheck_form = '=HYPERLINK(CONCATENATE("https://docs.google.com/forms/d/e/1FAIpQLScFgQMD4EHyas8OGt5pXsW4579Ppz3j-ihxfqqzbsyN6xL04w/viewform?usp=pp_url&entry.79984856=",INDIRECT(CONCAT("A", ROW())),"&entry.1989228284=",INDIRECT(CONCAT("D", ROW())),"&entry.1559052161=",INDIRECT(CONCAT("E", ROW())),"&entry.557486568=",INDIRECT(CONCAT("H", ROW())),"&entry.452611961=",INDIRECT(CONCAT("G", ROW())),"&entry.488477383=N%C3%A3o&entry.1729246832=N%C3%A3o&entry.872741789=N%C3%A3o&entry.475229757=10&entry.1939614848=N%C3%A3o&entry.613885024=",INDIRECT(CONCAT("G", ROW()))),"Analyze")'
+        open_ticket_in_zendesk = '=HYPERLINK(CONCATENATE("https://suportehotmart.zendesk.com/agent/tickets/",INDIRECT(CONCAT("A",ROW()))),"Open Ticket")'
         
+        agent_name = astrobox_ticket['agent_name']
+
+        emoji_pattern = re.compile("["
+            u"\U0001F600-\U0001F64F"  # emoticons
+            u"\U0001F300-\U0001F5FF"  # symbols & pictographs
+            u"\U0001F680-\U0001F6FF"  # transport & map symbols
+            u"\U0001F1E0-\U0001F1FF"  # flags (iOS)
+            "]+", flags=re.UNICODE)
+
+        new_agentName = emoji_pattern.sub(r'', agent_name)
+
+        agentName = re.sub(u'[^a-zA-Z0-9áéíóúÁÉÍÓÚâêîôÂÊÎÔãõÃÕçÇ: ]', '', new_agentName)
+
         temp = {
             'TICKET ID': astrobox_ticket['ticket_id'],
-            'CONTACT REASONS': astrobox_ticket['contact_reason'],
-            'CLUSTER': astrobox_ticket['cluster'],
-            'AGENTE': astrobox_ticket['agent_email'],
+            'TICKET CREATED AT': new_createdAt,
+            'AGENT NAME': agentName,
+            'AGENT E-MAIL': astrobox_ticket['agent_email'],
             'TEAM': astrobox_ticket['team'],
             'TEAM OPB': opinionbox_ticket.get('team'),
-            'PESQUISA ENVIADA EM': opinionbox_ticket.get('data_envio'),
-            'PESQUISA RESPONDIDA EM': opinionbox_ticket.get('datetime'),
+            'CLUSTER': astrobox_ticket['cluster'],
+            'CONTACT REASONS': astrobox_ticket['contact_reason'],
+            'TRANSACTION NUMBER': astrobox_ticket['transactionNumber'],
+            'PRODUCT ID': astrobox_ticket['productId'],
+            'FIRST RESOLUTION': firstResolution_formatted,
+            'SURVEY SENT AT': surveySentAt,
+            'SURVEY ANSWERED AT': surveyAnsweredAt,
             'P1': evaluation_grade,
             'P2': opinionbox_ticket.get('evaluation_reason'),
             'P3': opinionbox_ticket.get('evaluation_comments'),
+            'LINK TO SPOTCHECK': open_spotcheck_form,
+            'OPEN TICKET IN ZENDESK': open_ticket_in_zendesk,
         }
 
         if astrobox_ticket['team'] not in spotcheck_data:
@@ -442,11 +510,10 @@ def create_ticket_audit_csv(astrobox_data, opinionbox_data, file_path):
     print('writing file...')
 
     with open(file_path, 'w', newline='', encoding="UTF-8") as csvaudit:
-        fieldnames = ['TICKET ID', 'CONTACT REASONS', 'CLUSTER', 'AGENTE', 'TEAM', 'TEAM OPB', 'PESQUISA ENVIADA EM', 'PESQUISA RESPONDIDA EM', 
-                      'P1', 'P2', 'P3',
-                      'AUDITAR', 'ZND TICKET', 'AUDITOR', 'RESOLVIDO', 'TEMPO DE RESOLUÇÃO', 'DIFICULDADES']
+        fieldnames = ['TICKET ID', 'TICKET CREATED AT', 'AGENT NAME', 'AGENT E-MAIL', 'TEAM', 'TEAM OPB', 'CLUSTER', 'CONTACT REASONS', 'TRANSACTION NUMBER', 'PRODUCT ID', 'FIRST RESOLUTION', 'SURVEY SENT AT', 'SURVEY ANSWERED AT', 'P1', 'P2', 'P3',
+                      'LINK TO SPOTCHECK', 'OPEN TICKET IN ZENDESK', 'SPOTCHECKER', 'ANALYSIS FINISHED?', 'SPOTCHECK ELAPSED TIME', 'DID YOU HAVE ANY DIFFICULTIES? TELL US BELOW']
 
-        writer = csv.DictWriter(csvaudit, fieldnames=fieldnames, delimiter=';')
+        writer = csv.DictWriter(csvaudit, fieldnames=fieldnames, delimiter=';', dialect='excel')
 
         writer.writeheader()
         #pdb.set_trace()
@@ -455,15 +522,24 @@ def create_ticket_audit_csv(astrobox_data, opinionbox_data, file_path):
 
              # for each agent
             for agent, tickets in agents.items():
-                bad_tickets = [ticket for ticket in tickets if ticket['P1'] == 1 or ticket['P1'] == '1' or ticket['P1'] == 'Mal atendido(a)' or ticket['P1'] == 'Wronged' or ticket['P1'] == 'Pas du tout satisfait(e)' or ticket['P1'] == 'Mal assistito' or ticket['P1'] == 2 or ticket['P1'] == '2' or ticket['P1'] == 'Chateado(a)' or ticket['P1'] == 'Upset' or ticket['P1'] == 'Déçu(e)' or ticket['P1'] == 'Triste']
-                other_tickets = [ticket for ticket in tickets if ticket['P1'] is not 1 and ticket['P1'] is not 2]
+                bad_tickets = [ticket for ticket in tickets if ticket['P1'] == 1 or ticket['P1'] == 2]
+                other_tickets = [ticket for ticket in tickets if ticket['P1'] != 1 and ticket['P1'] != 2]
 
                 all_tickets = bad_tickets + other_tickets
+
+                if 'international' in team.lower():
+                    # caso o time for International, usar um sample máximo de 3
+                    max_sample = 3
+                else:
+                    # sample máximo de 4 por padrão
+                    max_sample = 4
+
+                sample_size = min(max_sample, len(all_tickets))
                 
-                all_tickets = random.sample(all_tickets, min(2, len(all_tickets)))
-                
-                for t in (all_tickets):
-                    writer.writerow(t)
+                all_tickets = random.sample(all_tickets, sample_size)
+                                
+                for spotcheck_tickets in (all_tickets):
+                    writer.writerow(spotcheck_tickets)
 
 
     print('\nArquivo gerado no diretório: ' + file_path)

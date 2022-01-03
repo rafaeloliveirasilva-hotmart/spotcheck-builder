@@ -33,22 +33,15 @@ application_name = 'assurance_spotcheck_v4.3.2'
 date_begin = datetime.date.today() - datetime.timedelta(days=DATE_INTERVAL_DAYS+1)
 date_end = datetime.date.today() - datetime.timedelta(days=1)
 
-product_team_id = '360004260611'
-refund_team_id = '360004260691'
-tool_team_id = '360004260551'
-int_buyers_team_id = '360004859552'
-payment_team_id = '360004246672'
-access_team_id = '360004246612'
-financial_team_id = '360004260571'
-int_users_team_id = '360004859572'
-int_french_english_id = '360007368032'
-int_access_team_id = '360019593232'
-hotmart_account_team_id = '360004246572'
-purchase_team_id = '360004260651'
-activation_team_id = '360019201292'
-int_journey_team = '360004859552'
-int_operations_team = '360019593232'
-int_product_team = '360004382372'
+financial = '360004260571'
+tools = '360004260551'
+activation = '360019201292'
+account = '360004246572'
+product = '360004260611'
+international_product = '360004382372'
+journey = '360004859552'
+operations = '360019593232'
+users = '360004859572'
 
 # query com o id dos times: https://astrobox.hotmart.com/query/run/351e7c23-6c8f-4ccb-a0c8-430e8ecd4922
 
@@ -56,7 +49,7 @@ astrobox_query = 'solved_tickets_by_period'
 astrobox_query_params = {
     'end': str(date_end),
     'begin': str(date_begin),
-    'team_id': [product_team_id, refund_team_id, tool_team_id, int_buyers_team_id, payment_team_id, access_team_id, financial_team_id, int_users_team_id, int_french_english_id, int_access_team_id, hotmart_account_team_id, purchase_team_id, activation_team_id, int_journey_team, int_operations_team, int_product_team]
+    'team_id': [financial, tools, activation, account, product, international_product, journey, operations, users]
 }
 
 base_dir = os.getenv("E:\QLT Assurance - Spotcheck")
@@ -223,6 +216,7 @@ question_ids = {
         'P-1022',
         'P-1025',
         'P-1013',
+        'P-1084'
     ],
     'evaluation_reason': [
         'P-707',
@@ -248,6 +242,7 @@ question_ids = {
         'P-1023',
         'P-1026',
         'P-1014',
+        'P-1085'
     ],
     'evaluation_comments': [
         'P-708',
@@ -273,6 +268,7 @@ question_ids = {
         'P-1024',
         'P-1027',
         'P-1015',
+        'P-1086'
     ]
 }
 
@@ -288,7 +284,7 @@ def get_opinionbox(token):
 
     codigos_integracao = ['4z1RSz3A2S', '031k8oK-4n', 'Zu89Rcpgku', 'e_nY5V-_Xf', 'muEOeuFOON', 'qyJunWhzC4', 'sWA9eDWsAE', 'KRgcU6VM6n', 'dJXFnabVxg', 
                           'DIV0LBGgng', 'xhyKyo1NIB', 'SSgrdz55cb', 'ELWoAnQH0A', 'zJU4_Xnd7E', 'F9YnYrXxW2', 'o_Ie6s0VXL', 'MI73AhzRnM', 'GHS-Rn3nOB', 'omxMplnNLi', 
-                          '9KPeXUB7W0', 'Ceel30w6CR', '3ZiCH0JBAi', 'vK966j_NrB', 'CO6v2gJ9D1']
+                          '9KPeXUB7W0', 'Ceel30w6CR', '3ZiCH0JBAi', 'vK966j_NrB', 'CO6v2gJ9D1', 'vo8hfBXaGY']
 
     ob_data = dict()
 
@@ -313,6 +309,7 @@ def get_opinionbox(token):
 
             for d in dados:
                 ticket_id = d['TickedID']
+                team = d['Time']
                 new = {
                     'hashtag': d['hashtag'],
                     'ticket_id': ticket_id,
@@ -320,7 +317,8 @@ def get_opinionbox(token):
                     'agent_email': d['Atribuído'],
                     'datetime': d['data_fim'],
                     'data_inicio': d['data_inicio'],
-                    'data_envio': d['data_envio']
+                    'data_envio': d['data_envio'],
+                    'team': team
                 }
 
                 for data_key in d:
@@ -360,7 +358,7 @@ def get_ticket_audit_file_path(base_path=base_dir):
 
     print('file will be saved on path: ' + absolut_path)
 
-    file_name = 'QLT Assurance - Spotcheck - ' + dt_string + ' - Bad Rated Tickets.csv'
+    file_name = 'QLT Assurance - Spotcheck - ' + dt_string + ' - Users.csv'
 
     print('file name: ' + file_name)
 
@@ -471,10 +469,12 @@ def create_ticket_audit_csv(astrobox_data, opinionbox_data, file_path):
 
         new_agentName = emoji_pattern.sub(r'', agent_name)
 
+        agentName = re.sub(u'[^a-zA-Z0-9áéíóúÁÉÍÓÚâêîôÂÊÎÔãõÃÕçÇ: ]', '', new_agentName)
+
         temp = {
             'TICKET ID': astrobox_ticket['ticket_id'],
             'TICKET CREATED AT': new_createdAt,
-            'AGENT NAME': new_agentName,
+            'AGENT NAME': agentName,
             'AGENT E-MAIL': astrobox_ticket['agent_email'],
             'TEAM': astrobox_ticket['team'],
             'TEAM OPB': opinionbox_ticket.get('team'),
@@ -506,7 +506,7 @@ def create_ticket_audit_csv(astrobox_data, opinionbox_data, file_path):
         fieldnames = ['TICKET ID', 'TICKET CREATED AT', 'AGENT NAME', 'AGENT E-MAIL', 'TEAM', 'TEAM OPB', 'CLUSTER', 'CONTACT REASONS', 'TRANSACTION NUMBER', 'PRODUCT ID', 'FIRST RESOLUTION', 'SURVEY SENT AT', 'SURVEY ANSWERED AT', 'P1', 'P2', 'P3',
                       'LINK TO SPOTCHECK', 'OPEN TICKET IN ZENDESK', 'SPOTCHECKER', 'ANALYSIS FINISHED?', 'SPOTCHECK ELAPSED TIME', 'DID YOU HAVE ANY DIFFICULTIES? TELL US BELOW']
 
-        writer = csv.DictWriter(csvaudit, fieldnames=fieldnames, delimiter=';')
+        writer = csv.DictWriter(csvaudit, fieldnames=fieldnames, delimiter=';', dialect='excel')
 
         writer.writeheader()
         #pdb.set_trace()
@@ -516,8 +516,22 @@ def create_ticket_audit_csv(astrobox_data, opinionbox_data, file_path):
              # for each agent
             for agent, tickets in agents.items():
                 bad_tickets = [ticket for ticket in tickets if ticket['P1'] == 1 or ticket['P1'] == 2]
+                other_tickets = [ticket for ticket in tickets if ticket['P1'] != 1 and ticket['P1'] != 2]
+
+                all_tickets = bad_tickets + other_tickets
+
+                if 'international' in team.lower():
+                    # caso o time for International, usar um sample máximo de 3
+                    max_sample = 4
+                else:
+                    # sample máximo de 4 por padrão
+                    max_sample = 4
+
+                sample_size = min(max_sample, len(all_tickets))
                 
-                for spotcheck_tickets in (bad_tickets):
+                all_tickets = random.sample(all_tickets, sample_size)
+                                
+                for spotcheck_tickets in (all_tickets):
                     writer.writerow(spotcheck_tickets)
 
 
