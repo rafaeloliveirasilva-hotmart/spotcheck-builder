@@ -22,6 +22,8 @@ ASTROBOX_TOKEN = "Bearer H4sIAAAAAAAAAGVU25KqOhT8Ik8Byjg%2BikGEIYlCLpCXUwIjd3VEu
 
 DATE_INTERVAL_DAYS = 7
 
+TICKET_SAMPLE = 4
+
 login = 'rafael.oliveirasilva@hotmart.com'
 pwd = 'raf060990'
 
@@ -522,7 +524,7 @@ def create_ticket_audit_csv(astrobox_data, opinionbox_data, file_path):
                 #     # sample máximo de 4 por padrão
                 #     max_sample = 4
 
-                sample_size = min(4, len(all_tickets))
+                sample_size = min(TICKET_SAMPLE, len(all_tickets))
                 
                 all_tickets = random.sample(all_tickets, sample_size)
                                 

@@ -21,6 +21,7 @@ import pdb
 ASTROBOX_TOKEN = "Bearer H4sIAAAAAAAAAGVU25KqOhT8Ik8Byjg%2BikGEIYlCLpCXUwIjd3VEueTrd7Cm9sM5D6miSLO61%2BpefE9ekThpiUsvpNLVUel27jUw05374db3iO28zT%2Ffk6enBpsiwywSTmfwFHNRCD68EmO8Zy27p%2B1envloxNS6JcvgGUee5reoT0i3hNI2EchqVGom4nTwSVAjWT8xiEcUzu9sHTmxjp2TiSpa%2BjtPxsZmEKH7wSdvEnxfu%2BVQZkvvnjm0jMKhPDsbzY%2BYFJGr9LgSyXjCBE6QPMNfbblwaE7%2B6rNzajRd1tprRE4vDOALSvhCZLtGgL4gSUe%2FsldotxqhdNeqnzbmrPPbTXeORHOOvCJ9f7%2FfztwJ30%2FZzqwSQ%2FuL%2Fd8seNFnjl6k19MaEtWrTCUCcInJdoDgyZK20QQ%2F5XQZFJnDJJa2oXSoeZ1UP7XCbNdY22uKv8e6RSPNC7HOSAA6TVReBR24gqE2xZI1aqYF5vAZk1qPJ70SpGgESXVYbSUy%2FsMPUk1pUP3TJQSqBoAjBttBHYkBXUPQjahyTUzqldKhYaCOtHqqIRhUtmQRG4izMU5UB1ljDRQwA7aFDPhdP1dBC1s4xDIffeJVyu8ncmxTaSowYZXPUYMd1iBJJ8W7FG8ulQ%2FiGphQDc46ZLdWZ0TAXf8%2Br2f%2FRVQMbnVTeDjMfiFSayorRRYFKnNzNpomnd6ZIdTeh6E27qN5Xsx9ZyqLrD69Bs1cS%2BWri7nXK6%2FqZPm%2BNwQ3a8GDPn0vgTUlRqBnzmaa8aG9oXTvHSNNhAFlKGQM%2FdZ5pgevEL84prFdSE2LzjXq4shsZVwTXIjd8IBtdgELrBlH7dFitjjSWr9QrTmQhp3cRuvc9q6dVe7dNtZRhWoot5NP0iE27CcC%2BxLu9BK2nvJ7r%2B5qGcs5e%2FEAJ8XXou7M2Svbb%2B5iXuDKnkQLddWTwqeaaN81mnjSVhiI1udQYgcO2HGXkFitKNWyH5BwVmcwWl9nn%2FuNFWwG5z6N%2FWf%2FRVBXXID54z6i%2FB59%2FHudxigPLi7jgbxM9yLH7f5RkOp2WjRn%2BWlusUB4deRMlP651hB%2BfeSvj2Zx8dzA8vuodw59D%2FBFP0rQphoqjqC1sjLvi%2B%2FTkjubw7FhHY5HYO7aKr2Vup5U2%2B9dPjZX7ITD5dg7XfuKa%2FJFZAvMQgzXPH7qjx6KknLSeLfudA7489YZnpwWLsxOsXjA9MZr7xnCIFonC3n5%2BrF83Ty06wKclsHdPZrl54L8PMYXOMC8WayD0Uoy8qg9ugWgSsNpvf1GYRSON%2BxMeba0r6Uk0tblbTgZW6L%2BKQ10LweRcOgs8up4SR75HxJjxHRoBQAA"
 
 DATE_INTERVAL_DAYS = 7
+TICKET_SAMPLE = 4
 
 login = 'rafael.oliveirasilva@hotmart.com'
 pwd = 'raf060990'
@@ -334,7 +335,7 @@ def get_opinionbox(token):
                 ob_data[ticket_id] = new
 
     import pandas
-    pandas.DataFrame(data).to_csv('./ob_data.csv')
+    pandas.DataFrame(data).to_csv('./' + 'ob_data - ' +  date.today().strftime("%d-%b-%Y") + '.csv')
 
     return ob_data
 
@@ -520,14 +521,14 @@ def create_ticket_audit_csv(astrobox_data, opinionbox_data, file_path):
 
                 all_tickets = bad_tickets + other_tickets
 
-                if 'international' in team.lower():
-                    # caso o time for International, usar um sample máximo de 3
-                    max_sample = 4
-                else:
-                    # sample máximo de 4 por padrão
-                    max_sample = 4
+                # if 'international' in team.lower():
+                #     # caso o time for International, usar um sample máximo de 3
+                #     max_sample = 4
+                # else:
+                #     # sample máximo de 4 por padrão
+                #     max_sample = 4
 
-                sample_size = min(max_sample, len(all_tickets))
+                sample_size = min(TICKET_SAMPLE, len(all_tickets))
                 
                 all_tickets = random.sample(all_tickets, sample_size)
                                 

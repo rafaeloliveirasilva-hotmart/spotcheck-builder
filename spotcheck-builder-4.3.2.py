@@ -430,7 +430,6 @@ def create_ticket_audit_csv(astrobox_data, opinionbox_data, file_path):
         old_createdAt = datetime.datetime.strptime(astrobox_ticket['createdAt'], '%Y-%m-%dT%H:%M:%SZ')
         new_createdAt = old_createdAt.strftime("%d/%m/%Y %H:%M:%S") 
         
-
         # É feita a captura dos campo da data de envio e data de resposta da pesquisa de satisfação através da OPB - que vem no formato '2021-12-2021T17:15:46.000Z'.
         # Em seguida a data é formatada para o padrão '17/12/2021 17:15:46'
         # Depois é testado se o campo de data de envio vier preenchido, a formatação ocorre, senão o código segue para o próximo teste
@@ -449,7 +448,6 @@ def create_ticket_audit_csv(astrobox_data, opinionbox_data, file_path):
             surveyAnsweredAt = old_surveyAnsweredAt.strftime("%d/%m/%Y %H:%M:%S") 
         else:
             pass
-
 
         # Mapeamento que verifica se a pesquisa da OPB vier com notas de 1 à 5 os números serão convertidos para inteiros, se vier como strings de sentimento passarão pelo map que irá atribuir uma nota baseada no sentimento
 
