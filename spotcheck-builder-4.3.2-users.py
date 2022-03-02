@@ -12,6 +12,7 @@ import getpass
 import os
 import re
 import pdb
+import math
 
 
 ######################
@@ -22,9 +23,6 @@ ASTROBOX_TOKEN = "Bearer H4sIAAAAAAAAAGVU25KqOhT8Ik8Byjg%2BikGEIYlCLpCXUwIjd3VEu
 
 DATE_INTERVAL_DAYS = 7
 TICKET_SAMPLE = 4
-
-login = 'rafael.oliveirasilva@hotmart.com'
-pwd = 'raf060990'
 
 astrobox_url = 'https://api-astrobox.hotmart.com/v1/'
 opinion_box_url = 'https://api-cx.opinionbox.com/'
@@ -83,11 +81,8 @@ def get_astrobox_token():
 
     login_url = 'https://api-sec-vlc.hotmart.com/security/oauth/token'
 
-    # username = input('Your email: ')
-    # user_pass = getpass.getpass('Your password: ')
-
-    username = login
-    user_pass = pwd
+    username = input('Your email: ')
+    user_pass = getpass.getpass('Your password: ')
 
     login_headers = {
         'Authorization': 'Basic MTJmYzVlZGUtNzRmYS00MWVjLTg4NmYtYzM4YzA4YjcxMGZmOjE4MjFhOGRlLTMxNDgtNGU3ZC05OGZmLWZkY2NiOGY0MzkzNw=='
@@ -352,8 +347,14 @@ def get_ticket_audit_file_path(base_path=base_dir):
 
     folder_name = 'QLT ASSURANCE - SPOTCHECK - Q' + str(current_quarter) + ' ' + str(date.today().year) + ' - CSVS'
 
+    today = datetime.datetime.today()
+    month_name = today.strftime("%B")
+    month_number = today.strftime("%m")
+    
+    subdir_name = month_number + ' - ' + month_name
+
     # Definir diretório para salvar o CSV
-    absolut_path = base_path + os.sep + folder_name + os.sep
+    absolut_path = base_path + os.sep + folder_name + os.sep + subdir_name + os.sep
     if not os.path.exists(absolut_path):
         os.makedirs(absolut_path)
 
@@ -416,7 +417,11 @@ def create_ticket_audit_csv(astrobox_data, opinionbox_data, file_path):
         # Em sequência o mesmo é formatado para o padrão hora/minuto/segundo
 
         firstResolution = astrobox_ticket['firstResolution']
-        firstResolution_formatted = str(datetime.timedelta(seconds=firstResolution))
+
+        if firstResolution is not None:
+            firstResolution_formatted = str(datetime.timedelta(seconds=firstResolution))
+        else:
+            firstResolution_formatted = ''
 
         # É feita a captura do campo da data de criação do ticket no Zendesk, através do Astrobox - que vem no formato '2021-12-2021T17:15:46Z'.
         # Em seguida a data é formatada para o padrão '17/12/2021 17:15:46'
@@ -478,7 +483,7 @@ def create_ticket_audit_csv(astrobox_data, opinionbox_data, file_path):
             'AGENT NAME': agentName,
             'AGENT E-MAIL': astrobox_ticket['agent_email'],
             'TEAM': astrobox_ticket['team'],
-            'TEAM OPB': opinionbox_ticket.get('team'),
+            # 'TEAM OPB': opinionbox_ticket.get('team'),
             'CLUSTER': astrobox_ticket['cluster'],
             'CONTACT REASONS': astrobox_ticket['contact_reason'],
             'TRANSACTION NUMBER': astrobox_ticket['transactionNumber'],
@@ -504,37 +509,63 @@ def create_ticket_audit_csv(astrobox_data, opinionbox_data, file_path):
     print('writing file...')
 
     with open(file_path, 'w', newline='', encoding="UTF-8") as csvaudit:
-        fieldnames = ['TICKET ID', 'TICKET CREATED AT', 'AGENT NAME', 'AGENT E-MAIL', 'TEAM', 'TEAM OPB', 'CLUSTER', 'CONTACT REASONS', 'TRANSACTION NUMBER', 'PRODUCT ID', 'FIRST RESOLUTION', 'SURVEY SENT AT', 'SURVEY ANSWERED AT', 'P1', 'P2', 'P3',
-                      'LINK TO SPOTCHECK', 'OPEN TICKET IN ZENDESK', 'SPOTCHECKER', 'ANALYSIS FINISHED?', 'SPOTCHECK ELAPSED TIME', 'DID YOU HAVE ANY DIFFICULTIES? TELL US BELOW']
+        fieldnames = ['TICKET ID', 'TICKET CREATED AT', 'AGENT NAME', 'AGENT E-MAIL', 'TEAM', 'CLUSTER', 'CONTACT REASONS', 'TRANSACTION NUMBER', 'PRODUCT ID', 'FIRST RESOLUTION', 'SURVEY SENT AT', 'SURVEY ANSWERED AT', 'P1', 'P2', 'P3',
+                      'LINK TO SPOTCHECK', 'OPEN TICKET IN ZENDESK', 'ASSIGNED TO', 'ANALYSIS FINISHED?', 'SPOTCHECK ELAPSED TIME', 'COMMENTS']
 
         writer = csv.DictWriter(csvaudit, fieldnames=fieldnames, delimiter=';', dialect='excel')
 
         writer.writeheader()
+
+        all_tickets = []
+        assign_analysts = {
+            'Activation Team': ['Brenno', 'Gabriela', 'Joanderson', 'Raffão'],
+            'Financial Team': ['Rafael', 'Brenno', 'Gabriela' , 'Raffão'],
+            'Tool Team': ['Rafael', 'Brenno', 'Joanderson', 'Raffão'],
+            'Hotmart Account Team': ['Rafael', 'Gabriela', 'Joanderson', 'Raffão'],
+            'Product Team': ['Brenno', 'Gabriela', 'Joanderson', 'Raffão'],
+            '[International] Journey Team': ['Rafael', 'Brenno', 'Gabriela', 'Joanderson'],
+            '[International] Operations Team': ['Rafael', 'Brenno', 'Gabriela', 'Joanderson'],
+            '[International] Users Team': ['Rafael', 'Brenno', 'Gabriela', 'Joanderson'],     
+            '[International] Product Team': ['Rafael', 'Brenno', 'Gabriela', 'Joanderson'] 
+        }
+
+        assign_map = {
+            team: {a: 0 for a in analysts}
+            for team, analysts in assign_analysts.items()
+        }
+
         #pdb.set_trace()
         # for each team
+
+        total_ticket_count = 0
+
         for team, agents in spotcheck_data.items():
+            team_ticket_count = sum(len(ts) for ts in agents.values())
+
+            total_ticket_count += team_ticket_count
 
              # for each agent
             for agent, tickets in agents.items():
-                bad_tickets = [ticket for ticket in tickets if ticket['P1'] == 1 or ticket['P1'] == 2]
-                other_tickets = [ticket for ticket in tickets if ticket['P1'] != 1 and ticket['P1'] != 2]
+                bad_tickets = [ticket for ticket in tickets if ticket['P1'] == 1 or ticket['P1'] == 2 and ticket['CLUSTER'] != 'closed_by_merge']
+                other_tickets = [ticket for ticket in tickets if ticket['P1'] != 1 and ticket['P1'] != 2 and ticket['CLUSTER'] != 'closed_by_merge']
 
                 all_tickets = bad_tickets + other_tickets
-
-                # if 'international' in team.lower():
-                #     # caso o time for International, usar um sample máximo de 3
-                #     max_sample = 4
-                # else:
-                #     # sample máximo de 4 por padrão
-                #     max_sample = 4
 
                 sample_size = min(TICKET_SAMPLE, len(all_tickets))
                 
                 all_tickets = random.sample(all_tickets, sample_size)
-                                
-                for spotcheck_tickets in (all_tickets):
-                    writer.writerow(spotcheck_tickets)
 
+                for ticket in all_tickets:
+                    team = ticket['TEAM']
+                    if team in assign_map:
+                        assignees = assign_map[team]
+                        ideal_assignments = math.ceil(team_ticket_count / len(assignees))
+                        avaliable = list(a for a, count in assignees.items() if count < ideal_assignments)
+                        assigned_to = random.choice(avaliable)
+                        assignees[assigned_to] += 1
+                        ticket['ASSIGNED TO'] = assigned_to
+
+                        writer.writerow(ticket)
 
     print('\nArquivo gerado no diretório: ' + file_path)
 

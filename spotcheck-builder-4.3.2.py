@@ -22,9 +22,6 @@ ASTROBOX_TOKEN = "Bearer H4sIAAAAAAAAAGVU25KqOhT8Ik8Byjg%2BikGEIYlCLpCXUwIjd3VEu
 
 DATE_INTERVAL_DAYS = 7
 
-login = 'rafael.oliveirasilva@hotmart.com'
-pwd = 'raf060990'
-
 astrobox_url = 'https://api-astrobox.hotmart.com/v1/'
 opinion_box_url = 'https://api-cx.opinionbox.com/'
 
@@ -89,11 +86,8 @@ def get_astrobox_token():
 
     login_url = 'https://api-sec-vlc.hotmart.com/security/oauth/token'
 
-    # username = input('Your email: ')
-    # user_pass = getpass.getpass('Your password: ')
-
-    username = login
-    user_pass = pwd
+    username = input('Your email: ')
+    user_pass = getpass.getpass('Your password: ')
 
     login_headers = {
         'Authorization': 'Basic MTJmYzVlZGUtNzRmYS00MWVjLTg4NmYtYzM4YzA4YjcxMGZmOjE4MjFhOGRlLTMxNDgtNGU3ZC05OGZmLWZkY2NiOGY0MzkzNw=='
@@ -520,8 +514,8 @@ def create_ticket_audit_csv(astrobox_data, opinionbox_data, file_path):
 
              # for each agent
             for agent, tickets in agents.items():
-                bad_tickets = [ticket for ticket in tickets if ticket['P1'] == 1 or ticket['P1'] == 2]
-                other_tickets = [ticket for ticket in tickets if ticket['P1'] != 1 and ticket['P1'] != 2]
+                bad_tickets = [ticket for ticket in tickets if ticket['P1'] == 1 or ticket['P1'] == 2 and ticket['CLUSTER'] != 'closed_by_merge']
+                other_tickets = [ticket for ticket in tickets if ticket['P1'] != 1 and ticket['P1'] != 2 and ticket['CLUSTER'] != 'closed_by_merge']
 
                 all_tickets = bad_tickets + other_tickets
 

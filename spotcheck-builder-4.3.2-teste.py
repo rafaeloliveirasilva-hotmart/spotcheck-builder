@@ -1,9 +1,12 @@
 __author__ = 'rafael.oliveirasilva@hotmart.com | QA & WFM'
 
+from cmath import asin
+from collections import defaultdict
 import csv
 import datetime
 from datetime import date
 import json
+import math
 import random
 from types import new_class
 import requests
@@ -12,6 +15,7 @@ import getpass
 import os
 import re
 import pdb
+import random
 
 
 ######################
@@ -21,6 +25,7 @@ import pdb
 ASTROBOX_TOKEN = "Bearer H4sIAAAAAAAAAGVU25KqOhT8Ik8Byjg%2BikGEIYlCLpCXUwIjd3VEueTrd7Cm9sM5D6miSLO61%2BpefE9ekThpiUsvpNLVUel27jUw05374db3iO28zT%2Ffk6enBpsiwywSTmfwFHNRCD68EmO8Zy27p%2B1envloxNS6JcvgGUee5reoT0i3hNI2EchqVGom4nTwSVAjWT8xiEcUzu9sHTmxjp2TiSpa%2BjtPxsZmEKH7wSdvEnxfu%2BVQZkvvnjm0jMKhPDsbzY%2BYFJGr9LgSyXjCBE6QPMNfbblwaE7%2B6rNzajRd1tprRE4vDOALSvhCZLtGgL4gSUe%2FsldotxqhdNeqnzbmrPPbTXeORHOOvCJ9f7%2FfztwJ30%2FZzqwSQ%2FuL%2Fd8seNFnjl6k19MaEtWrTCUCcInJdoDgyZK20QQ%2F5XQZFJnDJJa2oXSoeZ1UP7XCbNdY22uKv8e6RSPNC7HOSAA6TVReBR24gqE2xZI1aqYF5vAZk1qPJ70SpGgESXVYbSUy%2FsMPUk1pUP3TJQSqBoAjBttBHYkBXUPQjahyTUzqldKhYaCOtHqqIRhUtmQRG4izMU5UB1ljDRQwA7aFDPhdP1dBC1s4xDIffeJVyu8ncmxTaSowYZXPUYMd1iBJJ8W7FG8ulQ%2FiGphQDc46ZLdWZ0TAXf8%2Br2f%2FRVQMbnVTeDjMfiFSayorRRYFKnNzNpomnd6ZIdTeh6E27qN5Xsx9ZyqLrD69Bs1cS%2BWri7nXK6%2FqZPm%2BNwQ3a8GDPn0vgTUlRqBnzmaa8aG9oXTvHSNNhAFlKGQM%2FdZ5pgevEL84prFdSE2LzjXq4shsZVwTXIjd8IBtdgELrBlH7dFitjjSWr9QrTmQhp3cRuvc9q6dVe7dNtZRhWoot5NP0iE27CcC%2BxLu9BK2nvJ7r%2B5qGcs5e%2FEAJ8XXou7M2Svbb%2B5iXuDKnkQLddWTwqeaaN81mnjSVhiI1udQYgcO2HGXkFitKNWyH5BwVmcwWl9nn%2FuNFWwG5z6N%2FWf%2FRVBXXID54z6i%2FB59%2FHudxigPLi7jgbxM9yLH7f5RkOp2WjRn%2BWlusUB4deRMlP651hB%2BfeSvj2Zx8dzA8vuodw59D%2FBFP0rQphoqjqC1sjLvi%2B%2FTkjubw7FhHY5HYO7aKr2Vup5U2%2B9dPjZX7ITD5dg7XfuKa%2FJFZAvMQgzXPH7qjx6KknLSeLfudA7489YZnpwWLsxOsXjA9MZr7xnCIFonC3n5%2BrF83Ty06wKclsHdPZrl54L8PMYXOMC8WayD0Uoy8qg9ugWgSsNpvf1GYRSON%2BxMeba0r6Uk0tblbTgZW6L%2BKQ10LweRcOgs8up4SR75HxJjxHRoBQAA"
 
 DATE_INTERVAL_DAYS = 7
+TICKET_SAMPLE = 6
 
 astrobox_url = 'https://api-astrobox.hotmart.com/v1/'
 opinion_box_url = 'https://api-cx.opinionbox.com/'
@@ -30,22 +35,15 @@ application_name = 'assurance_spotcheck_v4.3.2'
 date_begin = datetime.date.today() - datetime.timedelta(days=DATE_INTERVAL_DAYS+1)
 date_end = datetime.date.today() - datetime.timedelta(days=1)
 
-product_team_id = '360004260611'
-refund_team_id = '360004260691'
-tool_team_id = '360004260551'
-int_buyers_team_id = '360004859552'
-payment_team_id = '360004246672'
-access_team_id = '360004246612'
-financial_team_id = '360004260571'
-int_users_team_id = '360004859572'
-int_french_english_id = '360007368032'
-int_access_team_id = '360019593232'
-hotmart_account_team_id = '360004246572'
-purchase_team_id = '360004260651'
-activation_team_id = '360019201292'
-int_journey_team = '360004859552'
-int_operations_team = '360019593232'
-int_product_team = '360004382372'
+financial = '360004260571'
+tools = '360004260551'
+activation = '360019201292'
+account = '360004246572'
+product = '360004260611'
+international_product = '360004382372'
+journey = '360004859552'
+operations = '360019593232'
+users = '360004859572'
 
 # query com o id dos times: https://astrobox.hotmart.com/query/run/351e7c23-6c8f-4ccb-a0c8-430e8ecd4922
 
@@ -53,13 +51,12 @@ astrobox_query = 'solved_tickets_by_period'
 astrobox_query_params = {
     'end': str(date_end),
     'begin': str(date_begin),
-    'team_id': [product_team_id, refund_team_id, tool_team_id, int_buyers_team_id, payment_team_id, access_team_id, financial_team_id, int_users_team_id, int_french_english_id, int_access_team_id, hotmart_account_team_id, purchase_team_id, activation_team_id, int_journey_team, int_operations_team, int_product_team]
+    'team_id': [financial, tools, activation, account, product, international_product, journey, operations, users]
 }
 
 base_dir = os.getenv("E:\QLT Assurance - Spotcheck")
 if os.name == 'nt':
     base_dir = 'E:\QLT Assurance - Spotcheck'
-
 
 #######################
 ###### ASTROBOX #######
@@ -217,6 +214,7 @@ question_ids = {
         'P-1022',
         'P-1025',
         'P-1013',
+        'P-1084'
     ],
     'evaluation_reason': [
         'P-707',
@@ -242,6 +240,7 @@ question_ids = {
         'P-1023',
         'P-1026',
         'P-1014',
+        'P-1085'
     ],
     'evaluation_comments': [
         'P-708',
@@ -267,6 +266,7 @@ question_ids = {
         'P-1024',
         'P-1027',
         'P-1015',
+        'P-1086'
     ]
 }
 
@@ -282,7 +282,7 @@ def get_opinionbox(token):
 
     codigos_integracao = ['4z1RSz3A2S', '031k8oK-4n', 'Zu89Rcpgku', 'e_nY5V-_Xf', 'muEOeuFOON', 'qyJunWhzC4', 'sWA9eDWsAE', 'KRgcU6VM6n', 'dJXFnabVxg', 
                           'DIV0LBGgng', 'xhyKyo1NIB', 'SSgrdz55cb', 'ELWoAnQH0A', 'zJU4_Xnd7E', 'F9YnYrXxW2', 'o_Ie6s0VXL', 'MI73AhzRnM', 'GHS-Rn3nOB', 'omxMplnNLi', 
-                          '9KPeXUB7W0', 'Ceel30w6CR', '3ZiCH0JBAi', 'vK966j_NrB', 'CO6v2gJ9D1']
+                          '9KPeXUB7W0', 'Ceel30w6CR', '3ZiCH0JBAi', 'vK966j_NrB', 'CO6v2gJ9D1', 'vo8hfBXaGY']
 
     ob_data = dict()
 
@@ -307,6 +307,7 @@ def get_opinionbox(token):
 
             for d in dados:
                 ticket_id = d['TickedID']
+                team = d['Time']
                 new = {
                     'hashtag': d['hashtag'],
                     'ticket_id': ticket_id,
@@ -314,7 +315,8 @@ def get_opinionbox(token):
                     'agent_email': d['Atribuído'],
                     'datetime': d['data_fim'],
                     'data_inicio': d['data_inicio'],
-                    'data_envio': d['data_envio']
+                    'data_envio': d['data_envio'],
+                    'team': team
                 }
 
                 for data_key in d:
@@ -330,7 +332,7 @@ def get_opinionbox(token):
                 ob_data[ticket_id] = new
 
     import pandas
-    pandas.DataFrame(data).to_csv('./ob_data.csv')
+    pandas.DataFrame(data).to_csv('./' + 'ob_data - ' +  date.today().strftime("%d-%b-%Y") + '.csv')
 
     return ob_data
 
@@ -347,14 +349,20 @@ def get_ticket_audit_file_path(base_path=base_dir):
 
     folder_name = 'QLT ASSURANCE - SPOTCHECK - Q' + str(current_quarter) + ' ' + str(date.today().year) + ' - CSVS'
 
+    today = datetime.datetime.today()
+    month_name = today.strftime("%B")
+    month_number = today.strftime("%m")
+    
+    subdir_name = month_number + ' - ' + month_name
+
     # Definir diretório para salvar o CSV
-    absolut_path = base_path + os.sep + folder_name + os.sep
+    absolut_path = base_path + os.sep + folder_name + os.sep + subdir_name + os.sep
     if not os.path.exists(absolut_path):
         os.makedirs(absolut_path)
 
     print('file will be saved on path: ' + absolut_path)
 
-    file_name = 'QLT Assurance - Spotcheck - ' + dt_string + ' - Bad Rated Tickets.csv'
+    file_name = 'QLT Assurance - Spotcheck - ' + dt_string + ' - Users Testing Script 2.csv'
 
     print('file name: ' + file_name)
 
@@ -411,7 +419,11 @@ def create_ticket_audit_csv(astrobox_data, opinionbox_data, file_path):
         # Em sequência o mesmo é formatado para o padrão hora/minuto/segundo
 
         firstResolution = astrobox_ticket['firstResolution']
-        firstResolution_formatted = str(datetime.timedelta(seconds=firstResolution))
+
+        if firstResolution is not None:
+            firstResolution_formatted = str(datetime.timedelta(seconds=firstResolution))
+        else:
+            firstResolution_formatted = ''
 
         # É feita a captura do campo da data de criação do ticket no Zendesk, através do Astrobox - que vem no formato '2021-12-2021T17:15:46Z'.
         # Em seguida a data é formatada para o padrão '17/12/2021 17:15:46'
@@ -465,10 +477,12 @@ def create_ticket_audit_csv(astrobox_data, opinionbox_data, file_path):
 
         new_agentName = emoji_pattern.sub(r'', agent_name)
 
+        agentName = re.sub(u'[^a-zA-Z0-9áéíóúÁÉÍÓÚâêîôÂÊÎÔãõÃÕçÇ: ]', '', new_agentName)
+
         temp = {
             'TICKET ID': astrobox_ticket['ticket_id'],
             'TICKET CREATED AT': new_createdAt,
-            'AGENT NAME': new_agentName,
+            'AGENT NAME': agentName,
             'AGENT E-MAIL': astrobox_ticket['agent_email'],
             'TEAM': astrobox_ticket['team'],
             'TEAM OPB': opinionbox_ticket.get('team'),
@@ -496,33 +510,60 @@ def create_ticket_audit_csv(astrobox_data, opinionbox_data, file_path):
 
     print('writing file...')
 
-    with open('QLT ASSURANCE - SPOTCHECK - Q1 2022 - CSVS/Query - Tag Pendente - 31_01_2022 (1).csv', encoding='utf-8') as csv_pending:
+    with open(file_path, 'w', newline='', encoding="UTF-8") as csvaudit:
+        fieldnames = ['TICKET ID', 'TICKET CREATED AT', 'AGENT NAME', 'AGENT E-MAIL', 'TEAM', 'TEAM OPB', 'CLUSTER', 'CONTACT REASONS', 'TRANSACTION NUMBER', 'PRODUCT ID', 'FIRST RESOLUTION', 'SURVEY SENT AT', 'SURVEY ANSWERED AT', 'P1', 'P2', 'P3',
+                      'LINK TO SPOTCHECK', 'OPEN TICKET IN ZENDESK', 'ASSIGNED TO', 'ANALYSIS FINISHED?', 'SPOTCHECK ELAPSED TIME', 'DID YOU HAVE ANY DIFFICULTIES? TELL US BELOW']
 
-        pending_table = csv.reader(csv_pending, delimiter=',',)
+        writer = csv.DictWriter(csvaudit, fieldnames=fieldnames, delimiter=';', dialect='excel')
 
-        for t in pending_table:
-            id_ticket = t[0]
+        writer.writeheader()
 
-            print(id_ticket)
+        all_tickets = []
+        assign_analysts = {
+            'Activation Team': ['Rafael', 'Brenno', 'Gabriela', 'Joanderson', 'Raffão'],
+            'Financial Team': ['Rafael', 'Brenno', 'Gabriela', 'Joanderson', 'Raffão'],
+            'Tool Team': ['Rafael', 'Brenno', 'Gabriela', 'Joanderson', 'Raffão'],
+            'Hotmart Account Team': ['Rafael', 'Brenno', 'Gabriela', 'Joanderson', 'Raffão'],
+            'Product Team': ['Rafael', 'Brenno', 'Gabriela', 'Joanderson', 'Raffão'],
+            '[International] Journey Team': ['Rafael', 'Brenno', 'Gabriela', 'Joanderson', 'Raffão'],
+            '[International] Operations Team': ['Rafael', 'Brenno', 'Gabriela', 'Joanderson', 'Raffão'],
+            '[International] Users Team': ['Rafael', 'Brenno', 'Gabriela', 'Joanderson', 'Raffão'],     
+            '[International] Product Team': ['Rafael', 'Brenno', 'Gabriela', 'Joanderson', 'Raffão'] 
+        }
 
-    # with open(file_path, 'w', newline='', encoding="UTF-8") as csvaudit:
-    #     fieldnames = ['TICKET ID', 'TICKET CREATED AT', 'AGENT NAME', 'AGENT E-MAIL', 'TEAM', 'TEAM OPB', 'CLUSTER', 'CONTACT REASONS', 'TRANSACTION NUMBER', 'PRODUCT ID', 'FIRST RESOLUTION', 'SURVEY SENT AT', 'SURVEY ANSWERED AT', 'P1', 'P2', 'P3',
-    #                   'LINK TO SPOTCHECK', 'OPEN TICKET IN ZENDESK', 'SPOTCHECKER', 'ANALYSIS FINISHED?', 'SPOTCHECK ELAPSED TIME', 'DID YOU HAVE ANY DIFFICULTIES? TELL US BELOW']
+        assign_map = {
+            team: {a: 0 for a in analysts}
+            for team, analysts in assign_analysts.items()
+        }
 
-    #     writer = csv.DictWriter(csvaudit, fieldnames=fieldnames, delimiter=';')
+        #pdb.set_trace()
+        # for each team
 
-    #     writer.writeheader()
-    #     #pdb.set_trace()
-    #     # for each team
-    #     for team, agents in spotcheck_data.items():
+        for team, agents in spotcheck_data.items():
+            total_ticket_count = sum(len(ts) for ts in agents.values())
 
-    #          # for each agent
-    #         for agent, tickets in agents.items():
-    #             bad_tickets = [ticket for ticket in tickets if ticket['P1'] == 1 or ticket['P1'] == 2]
+             # for each agent
+            for agent, tickets in agents.items():
+                bad_tickets = [ticket for ticket in tickets if ticket['P1'] == 1 or ticket['P1'] == 2 and ticket['CLUSTER'] != 'closed_by_merge']
+                other_tickets = [ticket for ticket in tickets if ticket['P1'] != 1 and ticket['P1'] != 2 and ticket['CLUSTER'] != 'closed_by_merge']
+
+                all_tickets = bad_tickets + other_tickets
+
+                sample_size = min(TICKET_SAMPLE, len(all_tickets))
                 
-    #             for spotcheck_tickets in (bad_tickets):
-    #                 writer.writerow(spotcheck_tickets)
+                all_tickets = random.sample(all_tickets, sample_size)
 
+                for ticket in all_tickets:
+                    team = ticket['TEAM']
+                    if team in assign_map:
+                        assignees = assign_map[team]
+                        ideal_assignments = math.ceil(total_ticket_count / len(assignees))
+                        avaliable = list(a for a, count in assignees.items() if count < ideal_assignments)
+                        assigned_to = random.choice(avaliable)
+                        assignees[assigned_to] += 1
+                        ticket['ASSIGNED TO'] = assigned_to
+
+                    writer.writerow(ticket)
 
     print('\nArquivo gerado no diretório: ' + file_path)
 
