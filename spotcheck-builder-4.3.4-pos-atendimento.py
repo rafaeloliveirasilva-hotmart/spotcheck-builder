@@ -23,6 +23,9 @@ ASTROBOX_TOKEN = "Bearer H4sIAAAAAAAAAGVU25KqOhT8Ik8Byjg%2BikGEIYlCLpCXUwIjd3VEu
 DATE_INTERVAL_DAYS = 7
 TICKET_SAMPLE = 4
 
+login = 'rafael.oliveirasilva@hotmart.com'
+pwd = 'raf060990'
+
 astrobox_url = 'https://api-astrobox.hotmart.com/v1/'
 opinion_box_url = 'https://api-cx.opinionbox.com/'
 
@@ -38,6 +41,8 @@ users = '360004859572'
 # query com o id dos times: https://astrobox.hotmart.com/query/run/351e7c23-6c8f-4ccb-a0c8-430e8ecd4922
 
 astrobox_query = 'solved_tickets_by_period'
+astrobox_query_alt = '7c739167-7b4a-4d8c-8f02-6f390b13c10e'
+
 astrobox_query_params = {
     'end': str(date_end),
     'begin': str(date_begin),
@@ -74,8 +79,11 @@ def get_astrobox_token():
 
     login_url = 'https://api-sec-vlc.hotmart.com/security/oauth/token'
 
-    username = input('Your email: ')
-    user_pass = getpass.getpass('Your password: ')
+    # username = input('Your email: ')
+    # user_pass = getpass.getpass('Your password: ')
+
+    username = login
+    user_pass = pwd
 
     login_headers = {
         'Authorization': 'Basic MTJmYzVlZGUtNzRmYS00MWVjLTg4NmYtYzM4YzA4YjcxMGZmOjE4MjFhOGRlLTMxNDgtNGU3ZC05OGZmLWZkY2NiOGY0MzkzNw=='
@@ -141,6 +149,45 @@ def run_astrobox_query(query, query_params={}, token=ASTROBOX_TOKEN):
         new_filtered_ticket[score['ticket_id']] = score
     
     return new_filtered_ticket
+
+# request para executar a query
+def run_astrobox_query_alt(query_alt, query_params={}, token=ASTROBOX_TOKEN):
+    print('query: ' + query_alt)
+    print('params: ' + json.dumps(query_params))
+    print('fetching astrobox data...')
+
+    if (len(token) < 12) or (not check_astrobox_token(token)):
+        token = get_astrobox_token()
+
+    execution_headers = {
+        'Authorization': token,
+        'X-Client-Name': application_name,
+        'accept': 'application/x-ndjson',
+        'Content-Type': 'application/json'
+    }
+
+    execution_url = astrobox_url + 'executor/reactive/'
+
+    execution_body = {
+        'query': query_alt,
+        'parameters': query_params,
+        'saveResult': False
+    }
+
+    # check if query argument is an id or alias, and adjusts the execution url
+    if re.match(r"[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}", query_alt):
+        execution_url = execution_url + 'by-id/'
+    else:
+        execution_url = execution_url + 'by-alias/'
+
+    execution_resp = requests.post(execution_url, headers=execution_headers, data=json.dumps(execution_body))
+
+    if execution_resp.status_code != 200:
+        raise Exception(execution_resp.json()['error_description'])
+
+    # returns the query results as a json array
+    
+    return execution_resp.json(cls=ndjson.Decoder)
 
 ##########################
 ###### OPINION BOX #######
@@ -321,8 +368,8 @@ def get_opinionbox(token):
 
                 ob_data[ticket_id] = new
 
-    import pandas
-    pandas.DataFrame(data).to_csv('./' + 'ob_data - ' +  date.today().strftime("%d-%b-%Y") + '.csv')
+    # import pandas
+    # pandas.DataFrame(data).to_csv('./' + 'ob_data - ' +  date.today().strftime("%d-%b-%Y") + '.csv')
 
     return ob_data
 
@@ -346,7 +393,7 @@ def get_ticket_audit_file_path(base_path=base_dir):
 
     print('file will be saved on path: ' + absolut_path)
 
-    file_name = f'QLT Assurance - Spotcheck - { dt_string } - Pós Atendimento.csv'
+    file_name = f'QLT Assurance - Spotcheck - { dt_string } - Pós Atendimento - teste email.csv'
 
     print('file name: ' + file_name)
 
@@ -387,13 +434,15 @@ evaluation_map = {
 }
 
 
-def create_ticket_audit_csv(astrobox_data, opinionbox_data, file_path):
+def create_ticket_audit_csv(astrobox_data, astrobox_data_alt, opinionbox_data, file_path):
     print(f'processing {len(astrobox_data)} data from Astrobox...')
     print(f'processing {len(opinionbox_data)} data from Opinionbox...')
 
     # 3. Criar um dicionário vazio que receberá as infos
     spotcheck_data = {}
-
+    data_alt = dict()
+    for i in astrobox_data_alt:
+        data_alt[ i['ticket_id'] ] = { 'email': i['email'], 'country': i['country'], 'ddd': i['ddd'], 'telephone': i['telephone'] }
     # Se houver algum dado na tabela, ou seja, se ela não estiver vazia o código continua
     for ticket_id, astrobox_ticket in astrobox_data.items():
         
@@ -477,7 +526,6 @@ def create_ticket_audit_csv(astrobox_data, opinionbox_data, file_path):
             'AGENT NAME': agentName,
             'AGENT E-MAIL': astrobox_ticket['agent_email'],
             'TEAM': astrobox_ticket['team'],
-            # 'TEAM OPB': opinionbox_ticket.get('team'),
             'CLUSTER': astrobox_ticket['cluster'],
             'CONTACT REASONS': astrobox_ticket['contact_reason'],
             'TRANSACTION NUMBER': astrobox_ticket['transactionNumber'],
@@ -492,7 +540,11 @@ def create_ticket_audit_csv(astrobox_data, opinionbox_data, file_path):
             'LINK TO FORM': open_spotcheck_form,
             'OPEN TICKET IN ZENDESK': open_ticket_in_zendesk,
             'STATUS': astrobox_ticket['status'],
-            'SPANISH TAG': spanishLang_tag
+            'SPANISH TAG': spanishLang_tag,
+            'REQUESTER EMAIL': astrobox_ticket['requester_email'],
+            'COUNTRY':  data_alt[ astrobox_ticket['ticket_id'] ]['country'] if astrobox_ticket['ticket_id'] in data_alt else None ,
+            'DDD': data_alt[ astrobox_ticket['ticket_id'] ]['ddd'] if astrobox_ticket['ticket_id'] in data_alt else None,
+            'TELEPHONE': data_alt[ astrobox_ticket['ticket_id'] ]['telephone'] if astrobox_ticket['ticket_id'] in data_alt else None
         }
 
         if astrobox_ticket['team'] not in spotcheck_data:
@@ -506,7 +558,7 @@ def create_ticket_audit_csv(astrobox_data, opinionbox_data, file_path):
     print('writing file...')
 
     with open(file_path, 'w', newline='', encoding="UTF-8") as csvaudit:
-        fieldnames = ['TICKET ID', 'TICKET CREATED AT', 'COUNTRY', 'SPANISH TAG', 'AGENT NAME', 'AGENT E-MAIL', 'TEAM', 'CLUSTER', 'CONTACT REASONS', 'TRANSACTION NUMBER', 'PRODUCT ID', 'IS REOPENED', 'REPLIES', 'SURVEY SENT AT', 'SURVEY ANSWERED AT', 'P1', 'P2', 'P3', 'LINK TO FORM', 'OPEN TICKET IN ZENDESK', 'STATUS', 'AFTER SERVICE AGENT', 'CONTACTED?', 'COMMENTS']
+        fieldnames = ['TICKET ID', 'TICKET CREATED AT', 'REQUESTER EMAIL', 'DDD', 'TELEPHONE', 'COUNTRY', 'SPANISH TAG', 'AGENT NAME', 'AGENT E-MAIL', 'TEAM', 'CLUSTER', 'CONTACT REASONS', 'TRANSACTION NUMBER', 'PRODUCT ID', 'IS REOPENED', 'REPLIES', 'SURVEY SENT AT', 'SURVEY ANSWERED AT', 'P1', 'P2', 'P3', 'LINK TO FORM', 'OPEN TICKET IN ZENDESK', 'STATUS', 'AFTER SERVICE AGENT', 'CONTACTED?', 'COMMENTS']
 
         writer = csv.DictWriter(csvaudit, fieldnames=fieldnames, delimiter=';', dialect='excel')
 
@@ -534,15 +586,15 @@ def create_ticket_audit_csv(astrobox_data, opinionbox_data, file_path):
                     ticket['REPLIES'] == 1 and 
                     ticket['STATUS'] == 'CLOSED' and
                     ticket['CLUSTER'] != 'closed_by_merge' and 
-                    ticket['SPANISH TAG'] == 'idioma_espanhol'
+                    ticket['SPANISH TAG'] == 'idioma_espanhol' and 
+                    ticket['TELEPHONE'] != None and
+                    ticket['COUNTRY'] != None
                 ]
                                 
                 for spotcheck_tickets in (contactReasons_exception):
                     writer.writerow(spotcheck_tickets)
              
     print('\nArquivo gerado no diretório: ' + file_path)
-
-    print("Press ENTER to exit...")
 
 #################
 ##### INIT ######
@@ -551,5 +603,6 @@ def create_ticket_audit_csv(astrobox_data, opinionbox_data, file_path):
 if __name__ == "__main__":
     file_path = get_ticket_audit_file_path(base_dir)
     astrobox_data = run_astrobox_query(astrobox_query, astrobox_query_params, ASTROBOX_TOKEN)
+    astrobox_data_alt = run_astrobox_query_alt(astrobox_query_alt, astrobox_query_params, ASTROBOX_TOKEN)
     opinionbox_data = get_opinionbox(get_opinionbox_token())
-    create_ticket_audit_csv(astrobox_data, opinionbox_data, file_path)
+    create_ticket_audit_csv(astrobox_data, astrobox_data_alt, opinionbox_data, file_path)

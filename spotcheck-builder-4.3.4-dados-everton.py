@@ -25,6 +25,9 @@ DATE_INTERVAL_DAYS = 7
 DATE_INTERVAL_DAYS_BEGIN = 60
 DATE_INTERVAL_END = 30
 
+login = 'rafael.oliveirasilva@hotmart.com'
+pwd = 'raf060990'
+
 astrobox_url = 'https://api-astrobox.hotmart.com/v1/'
 opinion_box_url = 'https://api-cx.opinionbox.com/'
 
@@ -75,8 +78,11 @@ def get_astrobox_token():
 
     login_url = 'https://api-sec-vlc.hotmart.com/security/oauth/token'
 
-    username = input('Your email: ')
-    user_pass = getpass.getpass('Your password: ')
+    # username = input('Your email: ')
+    # user_pass = getpass.getpass('Your password: ')
+
+    username = login
+    user_pass = pwd
 
     login_headers = {
         'Authorization': 'Basic MTJmYzVlZGUtNzRmYS00MWVjLTg4NmYtYzM4YzA4YjcxMGZmOjE4MjFhOGRlLTMxNDgtNGU3ZC05OGZmLWZkY2NiOGY0MzkzNw=='

@@ -24,6 +24,9 @@ ASTROBOX_TOKEN = "Bearer H4sIAAAAAAAAAGVU25KqOhT8Ik8Byjg%2BikGEIYlCLpCXUwIjd3VEu
 DATE_INTERVAL_DAYS = 7
 TICKET_SAMPLE = 4
 
+login = 'rafael.oliveirasilva@hotmart.com'
+pwd = 'raf060990'
+
 astrobox_url = 'https://api-astrobox.hotmart.com/v1/'
 opinion_box_url = 'https://api-cx.opinionbox.com/'
 
@@ -81,8 +84,11 @@ def get_astrobox_token():
 
     login_url = 'https://api-sec-vlc.hotmart.com/security/oauth/token'
 
-    username = input('Your email: ')
-    user_pass = getpass.getpass('Your password: ')
+    # username = input('Your email: ')
+    # user_pass = getpass.getpass('Your password: ')
+
+    username = login
+    user_pass = pwd
 
     login_headers = {
         'Authorization': 'Basic MTJmYzVlZGUtNzRmYS00MWVjLTg4NmYtYzM4YzA4YjcxMGZmOjE4MjFhOGRlLTMxNDgtNGU3ZC05OGZmLWZkY2NiOGY0MzkzNw=='
@@ -329,8 +335,8 @@ def get_opinionbox(token):
 
                 ob_data[ticket_id] = new
 
-    import pandas
-    pandas.DataFrame(data).to_csv('./' + 'ob_data - ' +  date.today().strftime("%d-%b-%Y") + '.csv')
+    # import pandas
+    # pandas.DataFrame(data).to_csv('./' + 'ob_data - ' +  date.today().strftime("%d-%b-%Y") + '.csv')
 
     return ob_data
 
@@ -461,7 +467,7 @@ def create_ticket_audit_csv(astrobox_data, opinionbox_data, file_path):
 
         # Variáveis que geram os links para realização da análise do Spotcheck e visualização dos tickets no zendesk respectivamente
 
-        open_spotcheck_form = '=HYPERLINK(CONCATENATE("https://docs.google.com/forms/d/e/1FAIpQLScFgQMD4EHyas8OGt5pXsW4579Ppz3j-ihxfqqzbsyN6xL04w/viewform?usp=pp_url&entry.79984856=",INDIRECT(CONCAT("A", ROW())),"&entry.1989228284=",INDIRECT(CONCAT("D", ROW())),"&entry.1559052161=",INDIRECT(CONCAT("E", ROW())),"&entry.557486568=",INDIRECT(CONCAT("H", ROW())),"&entry.452611961=",INDIRECT(CONCAT("G", ROW())),"&entry.488477383=N%C3%A3o&entry.1729246832=N%C3%A3o&entry.872741789=N%C3%A3o&entry.475229757=10&entry.1939614848=N%C3%A3o&entry.613885024=",INDIRECT(CONCAT("G", ROW()))),"Analyze")'
+        open_spotcheck_form = '=HYPERLINK(CONCATENATE("https://docs.google.com/forms/d/e/1FAIpQLScFgQMD4EHyas8OGt5pXsW4579Ppz3j-ihxfqqzbsyN6xL04w/viewform?usp=pp_url&entry.79984856=",INDIRECT(CONCAT("A", ROW())),"&entry.1989228284=",INDIRECT(CONCAT("D", ROW())),"&entry.1559052161=",INDIRECT(CONCAT("E", ROW())),"&entry.557486568=",INDIRECT(CONCAT("G", ROW())),"&entry.452611961=",INDIRECT(CONCAT("F", ROW())),"&entry.488477383=N%C3%A3o&entry.1729246832=N%C3%A3o&entry.872741789=N%C3%A3o&entry.475229757=10&entry.1939614848=N%C3%A3o&entry.613885024=",INDIRECT(CONCAT("F", ROW()))),"Analyze")'
         open_ticket_in_zendesk = '=HYPERLINK(CONCATENATE("https://suportehotmart.zendesk.com/agent/tickets/",INDIRECT(CONCAT("A",ROW()))),"Open Ticket")'
         
         agent_name = astrobox_ticket['agent_name']
